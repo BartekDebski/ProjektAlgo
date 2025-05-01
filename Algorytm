@@ -1,1 +1,232 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <title>Sudoku</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: #f7f7f7;
+      margin: 0;
+      padding: 20px;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .dark {
+      background: #121212;
+      color: #eee;
+    }
+
+    .sudoku {
+      display: grid;
+      grid-template-columns: repeat(9, 40px);
+      grid-template-rows: repeat(9, 40px);
+      gap: 1px;
+      background: #000;
+      margin-bottom: 20px;
+    }
+
+    input {
+      width: 38px;
+      height: 38px;
+      text-align: center;
+      font-size: 18px;
+      border: none;
+      transition: background 0.2s;
+    }
+
+    input:focus {
+      outline: 2px solid #4CAF50;
+    }
+
+    input:disabled {
+      background-color: #ddd;
+    }
+
+    .dark input:disabled {
+      background-color: #444;
+    }
+
+    button, label {
+      margin: 5px;
+      padding: 8px 12px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
+    .info {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 10px;
+    }
+
+    .timer {
+      font-size: 16px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h2>🧩 Sudoku</h2>
+
+  <div class="controls">
+    <button onclick="checkSolution()">✅ Sprawdź</button>
+    <button onclick="resetBoard()">🔄 Resetuj</button>
+    <button onclick="loadRandomPuzzle()">🎲 Losowa plansza</button>
+    <label>
+      <input type="checkbox" onchange="toggleDarkMode()"> 🌙 Tryb nocny
+    </label>
+  </div>
+
+  <div class="sudoku" id="board"></div>
+
+  <div class="timer" id="timer">⏱️ Czas: 0:00</div>
+  <div class="info" id="message"></div>
+
+  <script>
+    const puzzles = [
+      [
+        [5, 3, '', '', 7, '', '', '', ''],
+        [6, '', '', 1, 9, 5, '', '', ''],
+        ['', 9, 8, '', '', '', '', 6, ''],
+        [8, '', '', '', 6, '', '', '', 3],
+        [4, '', '', 8, '', 3, '', '', 1],
+        [7, '', '', '', 2, '', '', '', 6],
+        ['', 6, '', '', '', '', 2, 8, ''],
+        ['', '', '', 4, 1, 9, '', '', 5],
+        ['', '', '', '', 8, '', '', 7, 9]
+      ],
+      [
+        ['', '', 4, '', '', '', 8, '', ''],
+        [7, '', '', 2, '', '', '', '', 9],
+        ['', '', '', '', 5, '', '', '', 3],
+        ['', '', '', '', '', 6, 4, '', ''],
+        [5, '', 8, '', '', '', 2, '', 1],
+        ['', '', 2, 3, '', '', '', '', ''],
+        [6, '', '', '', 1, '', '', '', ''],
+        [1, '', '', '', '', 8, '', '', 7],
+        ['', '', 5, '', '', '', 1, '', '']
+      ]
+    ];
+
+    let originalPuzzle = [];
+    let timerSeconds = 0;
+    let timerInterval;
+
+    function renderBoard(puzzle) {
+      const board = document.getElementById("board");
+      board.innerHTML = '';
+      originalPuzzle = JSON.parse(JSON.stringify(puzzle));
+
+      puzzle.forEach((row, r) => {
+        row.forEach((cell, c) => {
+          const input = document.createElement("input");
+          input.maxLength = 1;
+          input.dataset.row = r;
+          input.dataset.col = c;
+          if (cell !== '') {
+            input.value = cell;
+            input.disabled = true;
+          } else {
+            input.addEventListener("input", (e) => {
+              const val = e.target.value;
+              if (!/^[1-9]$/.test(val)) e.target.value = '';
+            });
+          }
+          board.appendChild(input);
+        });
+      });
+
+      resetTimer();
+    }
+
+    function getBoardState() {
+      const inputs = document.querySelectorAll("#board input");
+      const state = Array.from({ length: 9 }, () => Array(9).fill(''));
+      inputs.forEach(input => {
+        const r = input.dataset.row;
+        const c = input.dataset.col;
+        state[r][c] = input.value;
+      });
+      return state;
+    }
+
+    function checkSolution() {
+      const state = getBoardState();
+      const msg = document.getElementById("message");
+
+      for (let i = 0; i < 9; i++) {
+        const row = new Set();
+        const col = new Set();
+        const box = new Set();
+        for (let j = 0; j < 9; j++) {
+          const r = state[i][j];
+          const c = state[j][i];
+          const br = 3 * Math.floor(i / 3) + Math.floor(j / 3);
+          const bc = 3 * (i % 3) + (j % 3);
+          const b = state[br][bc];
+
+          if (!r || !c || !b) {
+            msg.textContent = "❗ Uzupełnij wszystkie pola.";
+            return;
+          }
+
+          if (row.has(r) || col.has(c) || box.has(b)) {
+            msg.textContent = "❌ Coś się nie zgadza!";
+            return;
+          }
+
+          row.add(r);
+          col.add(c);
+          box.add(b);
+        }
+      }
+
+      msg.textContent = "✅ Gratulacje! Rozwiązanie poprawne!";
+    }
+
+    function resetBoard() {
+      renderBoard(originalPuzzle);
+      document.getElementById("message").textContent = '';
+    }
+
+    function loadRandomPuzzle() {
+      const random = puzzles[Math.floor(Math.random() * puzzles.length)];
+      renderBoard(random);
+      document.getElementById("message").textContent = '';
+    }
+
+    function toggleDarkMode() {
+      document.body.classList.toggle("dark");
+    }
+
+    function updateTimer() {
+      timerSeconds++;
+      const min = Math.floor(timerSeconds / 60);
+      const sec = timerSeconds % 60;
+      document.getElementById("timer").textContent = `⏱️ Czas: ${min}:${sec < 10 ? '0' : ''}${sec}`;
+    }
+
+    function resetTimer() {
+      clearInterval(timerInterval);
+      timerSeconds = 0;
+      updateTimer();
+      timerInterval = setInterval(updateTimer, 1000);
+    }
+
+    // Start with first puzzle
+    renderBoard(puzzles[0]);
+  </script>
+</body>
+</html>
 
