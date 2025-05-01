@@ -83,6 +83,7 @@
     <button onclick="checkSolution()">✅ Sprawdź</button>
     <button onclick="resetBoard()">🔄 Resetuj</button>
     <button onclick="loadRandomPuzzle()">🎲 Losowa plansza</button>
+    <button onclick="loadGeneratedPuzzle()">🤖 Wygeneruj planszę</button>
     <label>
       <input type="checkbox" onchange="toggleDarkMode()"> 🌙 Tryb nocny
     </label>
@@ -229,4 +230,121 @@
   </script>
 </body>
 </html>
+<script>
+  // ==== GENEROWANIE PEŁNEJ PLANSZY ====
+  function generateFullBoard() {
+    const board = Array.from({ length: 9 }, () => Array(9).fill(''));
 
+    function isValid(row, col, num) {
+      for (let i = 0; i < 9; i++) {
+        if (board[row][i] == num || board[i][col] == num) return false;
+        const br = 3 * Math.floor(row / 3) + Math.floor(i / 3);
+        const bc = 3 * Math.floor(col / 3) + (i % 3);
+        if (board[br][bc] == num) return false;
+      }
+      return true;
+    }
+
+    function solve(pos = 0) {
+      if (pos >= 81) return true;
+      const row = Math.floor(pos / 9);
+      const col = pos % 9;
+
+      const nums = [...Array(9).keys()].map(x => x + 1).sort(() => Math.random() - 0.5);
+      for (let num of nums) {
+        if (isValid(row, col, num)) {
+          board[row][col] = num;
+          if (solve(pos + 1)) return true;
+          board[row][col] = '';
+        }
+      }
+      return false;
+    }
+
+    solve();
+    return board;
+  }
+
+  // ==== WERSJA Z UKRYCIEM CZĘŚCI POL - TRUDNOŚĆ ====
+  function generatePuzzle(difficulty = 'medium') {
+    const full = generateFullBoard();
+    const clues = difficulty === 'easy' ? 40 : difficulty === 'hard' ? 25 : 32;
+
+    const puzzle = full.map(row => row.slice());
+    let removed = 81 - clues;
+    while (removed > 0) {
+      const r = Math.floor(Math.random() * 9);
+      const c = Math.floor(Math.random() * 9);
+      if (puzzle[r][c] !== '') {
+        puzzle[r][c] = '';
+        removed--;
+      }
+    }
+    return puzzle;
+  }
+
+  function loadGeneratedPuzzle() {
+    const puzzle = generatePuzzle('medium');
+    renderBoard(puzzle);
+    document.getElementById("message").textContent = '🧠 Wygenerowano planszę';
+  }
+
+  // ==== ZAPIS DO localStorage ====
+  function saveWinToLocalStorage(seconds) {
+    const record = {
+      time: seconds,
+      date: new Date().toLocaleString()
+    };
+    const data = JSON.parse(localStorage.getItem('sudokuResults') || '[]');
+    data.push(record);
+    localStorage.setItem('sudokuResults', JSON.stringify(data));
+  }
+
+  function showLastResults() {
+    const data = JSON.parse(localStorage.getItem('sudokuResults') || '[]');
+    if (data.length > 0) {
+      const latest = data.slice(-3).map(d => `🕒 ${d.time}s - ${d.date}`).join('\n');
+      alert("📜 Ostatnie wyniki:\n" + latest);
+    }
+  }
+
+  // ==== ROZSZERZENIE checkSolution() ====
+  function checkSolution() {
+    const state = getBoardState();
+    const msg = document.getElementById("message");
+
+    for (let i = 0; i < 9; i++) {
+      const row = new Set();
+      const col = new Set();
+      const box = new Set();
+      for (let j = 0; j < 9; j++) {
+        const r = state[i][j];
+        const c = state[j][i];
+        const br = 3 * Math.floor(i / 3) + Math.floor(j / 3);
+        const bc = 3 * (i % 3) + (j % 3);
+        const b = state[br][bc];
+
+        if (!r || !c || !b) {
+          msg.textContent = "❗ Uzupełnij wszystkie pola.";
+          return;
+        }
+
+        if (row.has(r) || col.has(c) || box.has(b)) {
+          msg.textContent = "❌ Coś się nie zgadza!";
+          return;
+        }
+
+        row.add(r);
+        col.add(c);
+        box.add(b);
+      }
+    }
+
+    msg.textContent = "✅ Gratulacje! Rozwiązanie poprawne!";
+    clearInterval(timerInterval);
+    saveWinToLocalStorage(timerSeconds);
+  }
+
+  // ==== Wywołaj na starcie ====
+  showLastResults();
+</script>
