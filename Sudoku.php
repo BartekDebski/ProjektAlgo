@@ -97,7 +97,7 @@ if (isset($_GET['email'])) {
   <div class="controls">
     <button onclick="checkSolution()">✅ Sprawdź</button>
     <button onclick="resetBoard()">🔄 Resetuj</button>
-    <button onclick="loadRandomPuzzle()">🎲 Gotowe wzory plansz</button>
+    <button onclick="loadRandomPuzzle()">🎲 Losowa plansza</button>
     <button onclick="loadGeneratedPuzzle()">🤖 Wygeneruj planszę</button>
     <label>
       <input type="checkbox" onchange="toggleDarkMode()"> 🌙 Tryb nocny
@@ -261,8 +261,10 @@ if (isset($_GET['email'])) {
   </script>
   
 <?php
-		$connection = mysqli_connect('projektyjk.cba.pl:3306', 'ugabuga', 'Ugabuga1');
-		$db = mysqli_select_db($connection, 'nietoper');
+	$config = require __DIR__ . '/./config/db_config.php';
+
+	$connection = mysqli_connect($config['host'], $config['user'], $config['pass']);
+	$db = mysqli_select_db($connection, $config['dbname']);
 		
 				if(isset($_GET["zapisz"]))
 				{

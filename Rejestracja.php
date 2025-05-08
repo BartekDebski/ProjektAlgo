@@ -129,8 +129,11 @@
   </form>
   
 <?php
-	$connection = mysqli_connect('projektyjk.cba.pl:3306', 'ugabuga', 'Ugabuga1');
-	$db = mysqli_select_db($connection, 'nietoper');
+
+	$config = require __DIR__ . '/./config/db_config.php';
+
+	$connection = mysqli_connect($config['host'], $config['user'], $config['pass']);
+	$db = mysqli_select_db($connection, $config['dbname']);
 	
 	if(isset($_GET["zapisz"]))
 	{
