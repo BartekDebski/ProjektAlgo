@@ -97,7 +97,7 @@ if (isset($_GET['email'])) {
   <div class="controls">
     <button onclick="checkSolution()">✅ Sprawdź</button>
     <button onclick="resetBoard()">🔄 Resetuj</button>
-    <button onclick="loadRandomPuzzle()">🎲 Losowa plansza</button>
+    <button onclick="loadRandomPuzzle()">🎲 Gotowe wzory plansz</button>
     <button onclick="loadGeneratedPuzzle()">🤖 Wygeneruj planszę</button>
     <label>
       <input type="checkbox" onchange="toggleDarkMode()"> 🌙 Tryb nocny
