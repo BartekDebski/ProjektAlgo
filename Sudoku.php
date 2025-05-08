@@ -261,25 +261,27 @@ if (isset($_GET['email'])) {
   </script>
   
 <?php
+
+if(isset($_GET["zapisz"]))
+{
 	$config = require __DIR__ . '/./config/db_config.php';
 
 	$connection = mysqli_connect($config['host'], $config['user'], $config['pass']);
 	$db = mysqli_select_db($connection, $config['dbname']);
-		
-				if(isset($_GET["zapisz"]))
-				{
-					$sql = "SELECT * FROM uzytkownik WHERE email='".$email."'";
-					$wynik = mysqli_query($connection, $sql);
-					if (mysqli_num_rows($wynik) > 0) {
-						$czas_grania = $_GET["czas_grania"];
-						$sql = "UPDATE uzytkownik SET czas_ostatniej_gry='".$czas_grania."' WHERE email='".$email."'";
-						$wynik=mysqli_query($connection, $sql);
-						$url = "http:///projektyjk.cba.pl/koniec.php?email=". urlencode($email);
-						header('Location: '.$url);
-						exit;
-					}
-					mysqli_close($connection);
-				}
+
+	$sql = "SELECT * FROM uzytkownik WHERE email='".$email."'";
+	$wynik = mysqli_query($connection, $sql);
+	if (mysqli_num_rows($wynik) > 0) {
+		$czas_grania = $_GET["czas_grania"];
+		$sql = "UPDATE uzytkownik SET czas_ostatniej_gry='".$czas_grania."' WHERE email='".$email."'";
+		$wynik=mysqli_query($connection, $sql);
+		$url = "http:///projektyjk.cba.pl/koniec.php?email=". urlencode($email);
+		mysqli_close($connection);
+		header('Location: '.$url);
+		exit;
+	}
+mysqli_close($connection);
+}
 
 ?>
 

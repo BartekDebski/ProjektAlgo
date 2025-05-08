@@ -130,13 +130,14 @@
   
 <?php
 
+	if(isset($_GET["zapisz"]))
+	{
+
 	$config = require __DIR__ . '/./config/db_config.php';
 
 	$connection = mysqli_connect($config['host'], $config['user'], $config['pass']);
 	$db = mysqli_select_db($connection, $config['dbname']);
-	
-	if(isset($_GET["zapisz"]))
-	{
+
 		$imie = $_GET["imie"];
 		$nazwisko = $_GET["nazwisko"];
 		$nick = $_GET["nick"];
@@ -163,8 +164,9 @@
 			header('Location: '.$url);
 			exit;
 		}
-	}
 	mysqli_close($connection);
+	}
+	
 ?>
 
 </body>
