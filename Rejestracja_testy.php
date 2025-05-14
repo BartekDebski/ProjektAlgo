@@ -74,7 +74,7 @@
   </style>
 </head>
 <body>
-  <form class="formularz" action="Rejestracja.php" method="get"> 
+  <form class="formularz" action="Rejestracja_testy.php" method="get"> 
     <h2>Rejestracja do gry</h2>
 
     <div class="formularz-pola">
@@ -142,13 +142,13 @@
 			echo("<strong>Błąd!</strong> użytkownik o podanym adresie email jest juz zarejestrowany.");
 			echo("</br>");
 			echo("</br>");
-			echo("Czy chcesz zagrać jako użytkownik <a href='Sudoku.php?email=".urlencode($email)."'>".$email."</a>?");
+			echo("Czy chcesz zagrać jako użytkownik <a href='Sudoku_testy.php?email=".urlencode($email)."'>".$email."</a>?");
 			echo("</div>");
 		} else {
 			$sql = "insert into uzytkownik(nick, email, wiek, plec) values ('$nick', '$email', '$wiek', '$plec')"; 
 			$wynik=mysqli_query($connection, $sql);
 			mysqli_close($connection);
-			$url = "http:///projektyjk.cba.pl/Sudoku.php?email=". urlencode($email);
+			$url = "http:///projektyjk.cba.pl/Sudoku_testy.php?email=". urlencode($email);
 			header('Location: '.$url);
 			exit;
 		}
@@ -159,4 +159,3 @@
 
 </body>
 </html>
-		
