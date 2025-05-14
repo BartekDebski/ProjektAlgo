@@ -1,5 +1,5 @@
-Link do testów gry
+Link do gry
 http://projektyjk.cba.pl/Rejestracja.php
 
 Link do testów automatycznych
-http://projektyjk.cba.pl/sudoku-tests.html
+http://projektyjk.cba.pl/Rejestracja_testy.php
